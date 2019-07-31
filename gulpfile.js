@@ -8,7 +8,8 @@ var htmlMin = require('gulp-htmlmin');//压缩html
 var imageMin = require("gulp-imagemin"); //压缩img
 var cached = require("gulp-cached"); //只传递更改过的文件，减少编译时间   避免修改一部分全局编译
 var connect = require('gulp-connect'); //启动服务器实现热更新
-// var clean = require('gulp-clean');
+var clean = require('gulp-clean');  //清除打包目录文件
+var fs = require('fs');
 
 var cssSrc = 'src/css/**/*.css',
     jsSrc = 'src/js/**/*.js',
@@ -16,11 +17,15 @@ var cssSrc = 'src/css/**/*.css',
     lessSrc = 'src/less/**/*.less',
     htmlSrc = 'src/page/**/*.html'
 
-
-// gulp.task('clean', function () {
-//     return gulp.src('dist', { read: false })
-//         .pipe(clean());
-// });
+// 注册清除文件夹任务，如果存在去清除。
+gulp.task('clean', function (done) {
+    if (fs.existsSync('dist') == true){
+        return gulp.src('dist', { read: false })
+            .pipe(clean());
+    }else{
+        done() //返回异步任务（表示已完成）
+    }
+});
 
 // 压缩图片
 gulp.task("img", function () {
@@ -83,16 +88,17 @@ gulp.task('css', gulp.series('less', function () {
 gulp.task('default', gulp.parallel('js', 'css', 'html', 'img'))
 
 // 注册监视任务
-gulp.task('watch', gulp.series('default',function () {
+gulp.task('watch', gulp.series('clean','default',function (done) {
     // 确认监听的目标以及绑定相应的任务
     gulp.watch(jsSrc, gulp.parallel('js'));
     gulp.watch(cssSrc, gulp.parallel('css'));
     gulp.watch(imgSrc, gulp.parallel('img'));
     gulp.watch(htmlSrc, gulp.parallel('html'));
+    done();
 }))
 
 // 使用gulp-connect服务启动任务
-gulp.task('server', gulp.series('default',function(){
+gulp.task('server', gulp.series('clean','default',function(done){
     connect.server({
         root: 'dist', //根目录
         port:5000, //端口号
@@ -103,4 +109,5 @@ gulp.task('server', gulp.series('default',function(){
     gulp.watch(cssSrc, gulp.parallel('css'));
     gulp.watch(imgSrc, gulp.parallel('img'));
     gulp.watch(htmlSrc, gulp.parallel('html'));
+    done();
 }))
