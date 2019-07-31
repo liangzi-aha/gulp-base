@@ -1,5 +1,5 @@
 #div1{
     width: 100px;
     height: 100px;
-    background-color: rgb(52, 248, 85);
+    background: url('../img/bg_popup_top.png');
 }

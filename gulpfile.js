@@ -6,7 +6,6 @@ var less = require('gulp-less');//less转css
 var cssClean = require('gulp-clean-css');//压缩css
 var htmlMin = require('gulp-htmlmin');//压缩html
 var imageMin = require("gulp-imagemin"); //压缩img
-var cached = require("gulp-cached"); //只传递更改过的文件，减少编译时间   避免修改一部分全局编译
 var connect = require('gulp-connect'); //启动服务器实现热更新
 var clean = require('gulp-clean');  //清除打包目录文件
 var fs = require('fs');
@@ -30,7 +29,6 @@ gulp.task('clean', function (done) {
 // 压缩图片
 gulp.task("img", function () {
     return gulp.src(imgSrc)
-        .pipe(cached('img'))
         .pipe(
             imageMin({
                 optimizationLevel: 5, //类型：Number  默认：3  取值范围：0-7（优化等级）
@@ -46,7 +44,6 @@ gulp.task("img", function () {
 // 压缩html任务
 gulp.task('html', function () {
     return gulp.src(htmlSrc)
-        .pipe(cached('html'))
         .pipe(htmlMin({ collapseWhitespace: true }))
         .pipe(gulp.dest('dist/page'))
         .pipe(connect.reload());
@@ -55,7 +52,6 @@ gulp.task('html', function () {
 // 注册合并压缩js的任务
 gulp.task('js', function () {
     return gulp.src(jsSrc) //找到目标源文件，将数据读取到gulp的内存中
-        .pipe(cached('js'))
         .pipe(concat('build.js'))//临时合并文件  参数合并之后文件名称
         .pipe(gulp.dest('dist/js'))//输出文件到本地
         .pipe(uglify()) //压缩文件
@@ -68,7 +64,6 @@ gulp.task('js', function () {
 // 注册转换less的任务
 gulp.task('less', function () {
     return gulp.src(lessSrc)
-        .pipe(cached('less'))
         .pipe(less()) //less转css
         .pipe(gulp.dest('src/css'))//输出地址
         .pipe(connect.reload());
@@ -77,7 +72,6 @@ gulp.task('less', function () {
 // 注册合并压缩css文件 gulp.series('a', 'b', 'c')
 gulp.task('css', gulp.series('less', function () {
     return gulp.src(cssSrc)
-        .pipe(cached('less'))
         .pipe(concat('build.css'))
         .pipe(rename({ suffix: '.min' }))
         .pipe(cssClean({ compatibility: 'ie8' }))
