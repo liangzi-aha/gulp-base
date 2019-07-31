@@ -77,6 +77,7 @@ gulp.task('less', function () {
 // 注册合并压缩css文件 gulp.series('a', 'b', 'c')
 gulp.task('css', gulp.series('less', function () {
     return gulp.src(cssSrc)
+        .pipe(cached('less'))
         .pipe(concat('build.css'))
         .pipe(rename({ suffix: '.min' }))
         .pipe(cssClean({ compatibility: 'ie8' }))
