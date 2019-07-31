@@ -1,0 +1,24 @@
+
+一、修改版本号添加方式
+
+1.gulp-rev/index.js
+
+// manifest[originalFile] = revisionedFile;
+
+manifest[originalFile] = originalFile + '?v=' + file.revHash;
+
+2.gulp-rev-collector/index.js
+
+// var cleanReplacement =  path.basename(json[key]).replace(new RegExp( opts.revSuffix ), '' );
+
+var cleanReplacement =  path.basename(json[key]).split('?')[0];
+
+
+二、解决多次构建时，重复添加版本号问题
+
+// regexp: new RegExp( prefixDelim + pattern, 'g' ),
+
+regexp: new RegExp( prefixDelim + pattern+'(\\?v=\\w{10})?', 'g' ),
+
+
+三、因为没做热更新处理，所以每次发布之前，跑一遍gulp命令，以获得最新的js、css格式文件版本号

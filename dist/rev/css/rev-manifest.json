@@ -1,5 +1,5 @@
 {
-  "test1.css": "test1-dfd8734383.css",
-  "test2.css": "test2-e6e8a4d0dc.css",
-  "test3.css": "test3-8272951c4c.css"
+  "test1.css": "test1.css?v=dfd8734383",
+  "test2.css": "test2.css?v=e6e8a4d0dc",
+  "test3.css": "test3.css?v=8272951c4c"
 }

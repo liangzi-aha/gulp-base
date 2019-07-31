@@ -1,4 +1,4 @@
 {
-  "test1.js": "test1-db4d928062.js",
-  "test2.js": "test2-629a3beb99.js"
+  "test1.js": "test1.js?v=db4d928062",
+  "test2.js": "test2.js?v=629a3beb99"
 }
