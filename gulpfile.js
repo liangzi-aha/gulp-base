@@ -1,4 +1,4 @@
-var gulp = require('gulp');
+var gulp = require('gulp'); //引入gulp打包模块
 var concat = require('gulp-concat'); //合并文件
 var uglify = require('gulp-uglify');//压缩js文件
 var rename = require('gulp-rename');//修改名称
@@ -7,6 +7,8 @@ var cssClean = require('gulp-clean-css');//压缩css
 var htmlMin = require('gulp-htmlmin');//压缩html
 var imageMin = require("gulp-imagemin"); //压缩img
 var cached = require("gulp-cached"); //只传递更改过的文件，减少编译时间   避免修改一部分全局编译
+var connect = require('gulp-connect'); //启动服务器实现热更新
+// var clean = require('gulp-clean');
 
 var cssSrc = 'src/css/**/*.css',
     jsSrc = 'src/js/**/*.js',
@@ -14,6 +16,11 @@ var cssSrc = 'src/css/**/*.css',
     lessSrc = 'src/less/**/*.less',
     htmlSrc = 'src/page/**/*.html'
 
+
+// gulp.task('clean', function () {
+//     return gulp.src('dist', { read: false })
+//         .pipe(clean());
+// });
 
 // 压缩图片
 gulp.task("img", function () {
@@ -27,7 +34,8 @@ gulp.task("img", function () {
                 multipass: true //类型：Boolean 默认：false 多次优化svg直到完全优化
             })
         )
-        .pipe(gulp.dest("dist/img"));
+        .pipe(gulp.dest("dist/img"))
+        .pipe(connect.reload());
 });
 
 // 压缩html任务
@@ -36,6 +44,7 @@ gulp.task('html', function () {
         .pipe(cached('html'))
         .pipe(htmlMin({ collapseWhitespace: true }))
         .pipe(gulp.dest('dist/page'))
+        .pipe(connect.reload());
 })
 
 // 注册合并压缩js的任务
@@ -45,9 +54,10 @@ gulp.task('js', function () {
         .pipe(concat('build.js'))//临时合并文件  参数合并之后文件名称
         .pipe(gulp.dest('dist/js'))//输出文件到本地
         .pipe(uglify()) //压缩文件
-        // .pipe(rename('build.min.js')) //修改名称
+        // .pipe(rename('buid.min.js')) //修改名称
         .pipe(rename({ suffix: '.min' })) //修改后缀
         .pipe(gulp.dest('dist/js'))
+        .pipe(connect.reload());
 })
 
 // 注册转换less的任务
@@ -56,24 +66,41 @@ gulp.task('less', function () {
         .pipe(cached('less'))
         .pipe(less()) //less转css
         .pipe(gulp.dest('src/css'))//输出地址
+        .pipe(connect.reload());
 })
 
 // 注册合并压缩css文件 gulp.series('a', 'b', 'c')
-gulp.task('css', gulp.series('less'), function () {
+gulp.task('css', gulp.series('less', function () {
     return gulp.src(cssSrc)
-        .pipe(cached('css'))
         .pipe(concat('build.css'))
         .pipe(rename({ suffix: '.min' }))
         .pipe(cssClean({ compatibility: 'ie8' }))
         .pipe(gulp.dest('dist/css'))
-})
-
-// 注册监视任务
-gulp.task('auto', function () {
-    // 确认监听的目标以及绑定相应的任务
-    gulp.watch('src/js/*.js', gulp.parallel('js'));
-    gulp.watch('src/css/*.css', gulp.parallel('css'));
-})
+        .pipe(connect.reload());
+}))
 
 // 注册默认任务  gulp.parallel 异步打包，gulp.series同步
-gulp.task('default', gulp.parallel('js', 'less', 'css', 'html','img', gulp.series('auto')))
+gulp.task('default', gulp.parallel('js', 'css', 'html', 'img'))
+
+// 注册监视任务
+gulp.task('watch', gulp.series('default',function () {
+    // 确认监听的目标以及绑定相应的任务
+    gulp.watch(jsSrc, gulp.parallel('js'));
+    gulp.watch(cssSrc, gulp.parallel('css'));
+    gulp.watch(imgSrc, gulp.parallel('img'));
+    gulp.watch(htmlSrc, gulp.parallel('html'));
+}))
+
+// 使用gulp-connect服务启动任务
+gulp.task('server', gulp.series('default',function(){
+    connect.server({
+        root: 'dist', //根目录
+        port:5000, //端口号
+        livereload: true, //实时刷新
+    })
+
+    gulp.watch(jsSrc, gulp.parallel('js'));
+    gulp.watch(cssSrc, gulp.parallel('css'));
+    gulp.watch(imgSrc, gulp.parallel('img'));
+    gulp.watch(htmlSrc, gulp.parallel('html'));
+}))
